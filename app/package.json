@@ -1,0 +1,28 @@
+{
+  "name": "seosprint",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "SeoSprint — the SEO command center that unifies Google Search Console, GA4 and Google Ads into one decision engine.",
+  "scripts": {
+    "dev": "vite",
+    "build": "node build.mjs",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.4",
+    "lucide-react": "^0.446.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.2"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.2",
+    "jsdom": "^29.1.1",
+    "linkedom": "^0.18.15",
+    "typescript": "^5.6.2",
+    "vite": "^5.4.8"
+  }
+}
