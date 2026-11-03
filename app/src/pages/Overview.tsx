@@ -45,9 +45,20 @@ export default function Overview() {
         right={<>
           <Segmented value={range} options={[{ v: '30', label: '30 days' }, { v: '90', label: '90 days' }]} onChange={setRange} />
           <button className="btn btn-sm" onClick={() => nav('/app/ask')}><Sparkles size={14} /> Ask why</button>
-          <button className="btn btn-primary btn-sm" onClick={() => nav('/app/connectors')}><Plug size={14} /> Manage sources</button>
+          <button className="btn btn-primary btn-sm" onClick={() => nav('/app/crawl')}><Zap size={14} /> Run a live crawl</button>
         </>}
       />
+
+      <Card style={{ marginBottom: 14, borderColor: 'rgba(109,94,252,.3)', background: 'linear-gradient(90deg, rgba(109,94,252,.1), transparent)' }}>
+        <div className="card-pad row gap12 wrap">
+          <span style={{ width: 32, height: 32, borderRadius: 9, background: 'rgba(109,94,252,.2)', display: 'grid', placeItems: 'center', color: '#b3a9ff', flex: 'none' }}><Zap size={16} /></span>
+          <div style={{ flex: 1, minWidth: 260 }}>
+            <div className="strong sm">The crawler is live — the analytics below are the demo workspace</div>
+            <div className="tiny muted">Crawls, competitor compares and rank checks run against real websites with no Google account. The Search Console, GA4 and Ads panels are sample data until you import them.</div>
+          </div>
+          <button className="btn btn-sm" onClick={() => nav('/app/crawl')}>Open crawler <ArrowRight size={13} /></button>
+        </div>
+      </Card>
 
       <div className="grid g5" style={{ marginBottom: 14 }}>
         <Kpi label="Organic clicks" value={fmtCompact(t.clicks)} delta={dClicks} sub={`of ${fmtCompact(t.impressions)} impressions`}

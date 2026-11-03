@@ -11,7 +11,9 @@ import Analytics from './pages/Analytics';
 import Ads from './pages/Ads';
 import Keywords from './pages/Keywords';
 import Ranks from './pages/Ranks';
-import Audit from './pages/Audit';
+import Crawl from './pages/Crawl';
+import Compare from './pages/Compare';
+import Serp from './pages/Serp';
 import Backlinks from './pages/Backlinks';
 import AIVisibility from './pages/AIVisibility';
 import Connectors from './pages/Connectors';
@@ -38,7 +40,10 @@ export default function App() {
             <Route path="search-console" element={<SearchConsole />} />
             <Route path="keywords" element={<Keywords />} />
             <Route path="ranks" element={<Ranks />} />
-            <Route path="audit" element={<Audit />} />
+            <Route path="crawl" element={<Crawl />} />
+            <Route path="audit" element={<Crawl />} />
+            <Route path="compare" element={<Compare />} />
+            <Route path="serp" element={<Serp />} />
             <Route path="analytics" element={<Analytics />} />
             <Route path="ads" element={<Ads />} />
             <Route path="ai" element={<AIVisibility />} />

@@ -33,20 +33,49 @@ export default function Connectors() {
         sub={<>{connected} of {connectors.length} sources connected · data refreshes on the cadence shown</>}
         right={<button className="btn btn-primary btn-sm" onClick={() => setActive('gsc')}><Plug size={14} /> Add a source</button>} />
 
+      <Card style={{ marginBottom: 14, borderColor: 'rgba(52,211,153,.3)', background: 'rgba(52,211,153,.06)' }}>
+        <div className="card-pad col gap12">
+          <div className="row gap12 wrap">
+            <span style={{ width: 32, height: 32, borderRadius: 9, display: 'grid', placeItems: 'center', background: 'rgba(52,211,153,.15)', color: 'var(--pos)' }}>
+              <CheckCircle2 size={17} />
+            </span>
+            <div style={{ flex: 1, minWidth: 260 }}>
+              <div className="strong sm">Two engines are always on — no account, no key</div>
+              <div className="tiny muted">The SeoSprint crawler and the live SERP reader power every crawl, compare and rank check. Everything below is an optional import on top of that.</div>
+            </div>
+            <Badge tone="pos">Built in</Badge>
+          </div>
+          <div className="grid g2 gap10" style={{ marginTop: 2 }}>
+            {[
+              ['SeoSprint Crawler', 'Fetches any URL, parses head, headings, images, links and JSON-LD, reads robots.txt and sitemap.xml, scores 23 checks.', '#6d5efc'],
+              ['Live SERP reader', 'Reads public result pages for a real top 20 and your position. Falls back across providers; add SERPAPI_KEY for guaranteed scale.', '#22d3ee'],
+            ].map(([n, d, c]) => (
+              <div key={n} className="row gap10" style={{ background: 'rgba(0,0,0,.2)', borderRadius: 10, padding: '10px 12px' }}>
+                <ConnectorGlyph glyph={n.split(' ')[1] ? n.split(' ')[1][0] : 'C'} color={c} size={28} />
+                <div>
+                  <div className="sm strong">{n}</div>
+                  <div className="tiny muted" style={{ lineHeight: 1.5 }}>{d}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Card>
+
       <Card style={{ marginBottom: 14, borderColor: liveOAuth ? 'rgba(52,211,153,.3)' : 'rgba(251,191,36,.28)', background: liveOAuth ? 'rgba(52,211,153,.06)' : 'rgba(251,191,36,.06)' }}>
         <div className="card-pad row gap12 wrap">
           <span style={{ width: 32, height: 32, borderRadius: 9, display: 'grid', placeItems: 'center', background: liveOAuth ? 'rgba(52,211,153,.15)' : 'rgba(251,191,36,.15)', color: liveOAuth ? 'var(--pos)' : 'var(--warn)' }}>
             {liveOAuth ? <CheckCircle2 size={17} /> : <KeyRound size={17} />}
           </span>
           <div style={{ flex: 1, minWidth: 260 }}>
-            <div className="strong sm">{liveOAuth ? 'Live OAuth is configured — Connect opens Google’s real consent screen.' : 'Connectors run in simulated consent mode in this build.'}</div>
+            <div className="strong sm">Google imports are optional</div>
             <div className="tiny muted">
               {liveOAuth
-                ? 'Tokens are stored per workspace and read GSC, GA4 and Ads with read-only scopes.'
-                : 'Clicking Connect mirrors the real OAuth flow and writes the connection to Supabase. To switch to live Google data, set VITE_GOOGLE_CLIENT_ID with a Google Cloud OAuth client that has the webmasters.readonly, analytics.readonly and adwords scopes.'}
+                ? 'OAuth is configured — Connect opens Google’s real consent screen and reads GSC, GA4 and Ads with read-only scopes.'
+                : 'Without a Google Cloud client, these connectors record the connection but read sample rows. Nothing in the product depends on them: crawls, compares and rank checks all work with no Google access at all.'}
             </div>
           </div>
-          <Badge tone={liveOAuth ? 'pos' : 'warn'}>{liveOAuth ? 'Live' : 'Simulated'}</Badge>
+          <Badge tone={liveOAuth ? 'pos' : 'warn'}>{liveOAuth ? 'Live OAuth' : 'Optional'}</Badge>
         </div>
       </Card>
 

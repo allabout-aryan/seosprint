@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Search, LineChart, Tags, TrendingUp, ShieldCheck, Link2, Sparkles,
-  Plug, Settings as Cog, MessageSquare, ChevronDown, RefreshCw, Bell, LogOut, Check, Menu, X,
+  Plug, Settings as Cog, MessageSquare, ChevronDown, RefreshCw, Bell, LogOut, Check, Menu, X, Swords,
 } from 'lucide-react';
 import { useApp } from '../lib/store';
 import { projects } from '../lib/data';
@@ -13,13 +13,14 @@ const NAV = [
     { to: '/app', label: 'Overview', icon: LayoutDashboard, end: true },
     { to: '/app/ask', label: 'Ask SeoSprint', icon: MessageSquare, badge: 'AI' },
   ]},
-  { group: 'Search', items: [
-    { to: '/app/search-console', label: 'Search Console', icon: Search },
-    { to: '/app/keywords', label: 'Keyword research', icon: Tags },
-    { to: '/app/ranks', label: 'Rank tracking', icon: TrendingUp },
-    { to: '/app/audit', label: 'Site audit', icon: ShieldCheck },
+  { group: 'Live crawl', items: [
+    { to: '/app/crawl', label: 'Site crawl', icon: ShieldCheck },
+    { to: '/app/compare', label: 'Compare', icon: Swords },
+    { to: '/app/serp', label: 'SERP & ranks', icon: Search },
+    { to: '/app/keywords', label: 'Keywords', icon: Tags },
   ]},
-  { group: 'Analytics', items: [
+  { group: 'Optional imports', items: [
+    { to: '/app/search-console', label: 'Search Console', icon: Search },
     { to: '/app/analytics', label: 'GA4', icon: LineChart },
     { to: '/app/ads', label: 'Google Ads', icon: Tags },
   ]},
@@ -119,7 +120,8 @@ export default function Shell() {
               {issue > 0 && <i className="dot" style={{ background: 'var(--neg)', marginLeft: -2 }} />}
             </button>
             <div className="row gap8" style={{ paddingLeft: 10, borderLeft: '1px solid var(--border)' }}>
-              <span className="badge pos"><i className="dot" />{connected} live sources</span>
+              <span className="badge accent"><i className="dot" />Crawler live</span>
+              <span className="badge pos"><i className="dot" />{connected} sources</span>
             </div>
           </div>
         </div>

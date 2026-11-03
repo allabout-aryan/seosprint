@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowRight, Search, LineChart, Tags, ShieldCheck, Sparkles, Plug, Zap, Target,
-  TrendingUp, Link2, Check, MessageSquare, Database, Globe, Lock,
+  TrendingUp, Link2, Check, MessageSquare, Database, Globe, Lock, Swords,
 } from 'lucide-react';
 import { Logo, Card, Badge, ConnectorGlyph } from '../components/ui';
 import { TrendChart, Sparkline } from '../components/charts';
@@ -45,27 +45,30 @@ export default function Landing() {
 
       <header className="hero">
         <div className="lwrap">
-          <span className="eyebrow"><Badge tone="accent" style={{ border: 0, background: 'transparent', padding: 0 }}><Sparkles size={12} /></Badge> Connects Search Console, GA4 and Google Ads in one place</span>
-          <h1>Your Google data, turned into <span className="grad">SEO decisions</span>.</h1>
+          <span className="eyebrow"><Badge tone="accent" style={{ border: 0, background: 'transparent', padding: 0 }}><Sparkles size={12} /></Badge> No Google account, no API key, no monthly plan</span>
+          <h1>Audit any site.<br /><span className="grad">Own the data.</span></h1>
           <p className="lede">
-            SeoSprint joins every search signal you already own — queries, pages, sessions, revenue and ad spend — into one
-            ranked list of what to fix next. No spreadsheets, no exports, no guessing.
+            SeoSprint runs its own crawler and reads search results itself. Point it at any URL — yours or a competitor's —
+            and get a scored technical audit, a broken-link report and live rank checks. Google Search Console and GA4 are
+            optional imports, never a requirement.
           </p>
           <div className="cta">
-            <button className="btn btn-primary btn-lg" onClick={go}>Explore the live workspace <ArrowRight size={16} /></button>
-            <button className="btn btn-lg" onClick={() => nav('/login')}>Sign in</button>
+            <button className="btn btn-primary btn-lg" onClick={() => { enterDemo(); nav('/app/crawl'); }}>Run a live crawl <ArrowRight size={16} /></button>
+            <button className="btn btn-lg" onClick={go}>Explore the workspace</button>
           </div>
           <div className="trust">
             <span className="row gap6"><Check size={13} color="var(--pos)" /> No credit card</span>
-            <span className="row gap6"><Check size={13} color="var(--pos)" /> Read-only Google scopes</span>
-            <span className="row gap6"><Check size={13} color="var(--pos)" /> Your data stays in your Supabase project</span>
+            <span className="row gap6"><Check size={13} color="var(--pos)" /> Works on sites you don't own</span>
+            <span className="row gap6"><Check size={13} color="var(--pos)" /> Nothing to authorise</span>
           </div>
 
           <div className="logo-strip">
-            {CONNECTORS.slice(0, 9).map((c) => (
-              <span key={c.id} className="logo-pill"><ConnectorGlyph glyph={c.glyph} color={c.color} size={20} />{c.name.replace('Google ', '')}</span>
+            <span className="logo-pill" style={{ borderColor: 'rgba(109,94,252,.45)', color: '#cfc9ff' }}><ConnectorGlyph glyph="C" color="#6d5efc" size={20} />SeoSprint Crawler</span>
+            <span className="logo-pill" style={{ borderColor: 'rgba(34,211,238,.45)', color: '#a5f3fc' }}><ConnectorGlyph glyph="S" color="#22d3ee" size={20} />Live SERP reader</span>
+            {['Search Console', 'GA4', 'Google Ads', 'Bing', 'Slack', 'BigQuery'].map((n) => (
+              <span key={n} className="logo-pill">{n}</span>
             ))}
-            <span className="logo-pill">+4 more</span>
+            <span className="logo-pill">optional</span>
           </div>
         </div>
       </header>
@@ -144,11 +147,11 @@ export default function Landing() {
           </div>
           <div className="grid g3">
             {[
-              [Target, 'Opportunity engine', 'Scores every query by position, volume and the real click curve, then ranks what is worth fixing first — striking distance, low CTR, content decay.'],
-              [Search, 'Search Console, decoded', 'Queries, pages, countries and devices with CTR measured against what the position should earn, not just a raw number.'],
-              [LineChart, 'GA4 revenue per page', 'Sessions, engagement, conversions and revenue joined to the pages that earned them, so you optimise for money, not clicks.'],
-              [Tags, 'Paid vs organic overlap', 'Finds the queries you pay for while already ranking #1–3 organically, and puts a rupee figure on the waste.'],
-              [ShieldCheck, 'Site audit that explains itself', '59 technical checks with why it matters and how to fix it, plus Core Web Vitals and a health score you can defend.'],
+              [ShieldCheck, 'Our own crawler', 'Fetches the page itself, parses the head, headings, images, links and JSON-LD, then scores it across 23 checks. No Google property needed.'],
+              [Globe, 'Whole-site crawl', 'Reads robots.txt and sitemap.xml, crawls up to 25 URLs, and groups issues by how many pages they affect — worst first.'],
+              [Swords, 'Competitor compare', 'Crawl your page and up to three rivals side by side, and see the H2 topics they cover that you do not.'],
+              [Search, 'Live SERP checks', 'Reads public result pages directly for a real top 20 and your actual position — with an honest error when a provider is rate-limited.'],
+              [Link2, 'Broken link report', 'Every link on the page is fetched and reported with its status code, so dead ends stop costing you crawl budget.'],
               [Sparkles, 'AI visibility', 'Tracks your prompts across ChatGPT, Gemini, Perplexity and AI Overviews — mentions, citations and share of voice.'],
             ].map(([Icon, t, d]: any) => (
               <Card key={t} className="feat">
@@ -192,9 +195,9 @@ export default function Landing() {
           <div className="section-head"><h2>Three steps, ten minutes</h2></div>
           <div className="grid g3">
             {[
-              ['01', 'Connect Google', 'Sign in with Google and approve read-only access to Search Console, GA4 and Ads. No exports, no service accounts.'],
-              ['02', 'Pick a property', 'SeoSprint pulls 16 months of history and joins queries to pages, sessions and campaigns in the first sync.'],
-              ['03', 'Work the list', 'Open the opportunity engine every Monday. Each item tells you what to change, on which URL, and what it is worth.'],
+              ['01', 'Paste a URL', 'Yours, a competitor’s, or a prospect’s. No verification, no DNS record, no OAuth screen — the crawler just fetches it.'],
+              ['02', 'Read the report', 'A score out of 100, every finding explained with why it matters and how to fix it, plus a broken-link list.'],
+              ['03', 'Fix and re-run', 'Ship the change, crawl again, watch the score move. Add Google Search Console later if you want query-level data.'],
             ].map(([n, t, d]) => (
               <Card key={n} className="card-pad col gap10">
                 <span className="mono" style={{ color: 'var(--accent)', fontSize: 13, fontWeight: 600 }}>{n}</span>
@@ -250,10 +253,10 @@ export default function Landing() {
       <section className="section" style={{ paddingTop: 10 }}>
         <div className="lwrap">
           <Card style={{ padding: 40, textAlign: 'center', background: 'radial-gradient(ellipse at 50% 0%, rgba(109,94,252,.18), transparent 60%)' }}>
-            <h2 style={{ fontSize: 30, fontWeight: 780, letterSpacing: '-.03em' }}>Stop exporting. Start deciding.</h2>
-            <p className="dim" style={{ marginTop: 10, maxWidth: 520, margin: '10px auto 0' }}>The live workspace is seeded with a real 90-day dataset — open it, click around, and see exactly what your Monday would look like.</p>
+            <h2 style={{ fontSize: 30, fontWeight: 780, letterSpacing: '-.03em' }}>Crawl something right now.</h2>
+            <p className="dim" style={{ marginTop: 10, maxWidth: 540, margin: '10px auto 0' }}>The crawler is already running on Supabase. Drop in any URL and you get a real report in a couple of seconds — nothing to connect, nothing to authorise.</p>
             <div className="row gap8" style={{ justifyContent: 'center', marginTop: 22 }}>
-              <button className="btn btn-primary btn-lg" onClick={go}>Open the live workspace <ArrowRight size={16} /></button>
+              <button className="btn btn-primary btn-lg" onClick={() => { enterDemo(); nav('/app/crawl'); }}>Run a live crawl <ArrowRight size={16} /></button>
             </div>
           </Card>
         </div>
