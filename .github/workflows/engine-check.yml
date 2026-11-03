@@ -1,0 +1,81 @@
+name: engine-check
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'engine-check.json'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Call the live SeoSprint engine
+        env:
+          KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yY3lrbGZ3YWh3dHZzYmhoenJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM2MzgwODYsImV4cCI6MjEwOTIxNDA4Nn0.KDEn3bTeEJdiTWju36I6c9zn4_TsXUCWkLgfjXPm5WU
+          BASE: https://mrcyklfwahwtvsbhhzrt.supabase.co/functions/v1/seo
+        run: |
+          set -x
+          echo "== health =="
+          curl -sS -m 30 -H "Authorization: Bearer $KEY" -H "apikey: $KEY" "$BASE?action=health" -o health.json -w "HTTP %{http_code}\n"
+          cat health.json; echo
+
+          echo "== audit example.com =="
+          curl -sS -m 60 -X POST "$BASE" \
+            -H "Authorization: Bearer $KEY" -H "apikey: $KEY" -H "content-type: application/json" \
+            -d '{"action":"audit","url":"example.com"}' -o audit.json -w "HTTP %{http_code}\n"
+          head -c 400 audit.json; echo
+
+          echo "== site crawl wikipedia =="
+          curl -sS -m 90 -X POST "$BASE" \
+            -H "Authorization: Bearer $KEY" -H "apikey: $KEY" -H "content-type: application/json" \
+            -d '{"action":"site","url":"https://en.wikipedia.org/wiki/Houseplant","maxPages":3}' -o site.json -w "HTTP %{http_code}\n"
+          head -c 300 site.json; echo
+
+          echo "== serp =="
+          curl -sS -m 60 -X POST "$BASE" \
+            -H "Authorization: Bearer $KEY" -H "apikey: $KEY" -H "content-type: application/json" \
+            -d '{"action":"serp","q":"indoor planters","domain":"urbanleaf.in"}' -o serp.json -w "HTTP %{http_code}\n"
+          head -c 300 serp.json; echo
+
+      - name: Summarise
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import json, datetime, os
+          out = {"checkedAt": datetime.datetime.utcnow().isoformat() + "Z"}
+          def load(name):
+              try:
+                  with open(name) as f:
+                      return json.load(f)
+              except Exception as e:
+                  return {"parse_error": str(e)}
+          out["health"] = load("health.json")
+          a = load("audit.json")
+          out["audit"] = {"ok": a.get("ok"), "url": a.get("url"), "score": a.get("score"),
+                          "findings": len(a.get("findings") or []), "title": (a.get("page") or {}).get("title")}
+          s = load("site.json")
+          out["site"] = {"ok": s.get("ok"), "crawled": s.get("crawled"), "score": s.get("siteScore"),
+                         "issues": len(s.get("issues") or [])}
+          p = load("serp.json")
+          out["serp"] = {"ok": p.get("ok"), "provider": p.get("provider"), "results": len(p.get("results") or []),
+                         "yourRank": p.get("yourRank"), "tried": p.get("tried")}
+          with open("engine-check.json", "w") as f:
+              json.dump(out, f, indent=2)
+          print(json.dumps(out, indent=2))
+          PY
+
+      - name: Commit result
+        if: always()
+        run: |
+          git config user.name "engine-check"
+          git config user.email "engine-check@users.noreply.github.com"
+          git add engine-check.json || true
+          git commit -m "chore: engine check [skip ci]" || echo "nothing to commit"
+          git push || echo "push skipped"
