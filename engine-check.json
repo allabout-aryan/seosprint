@@ -1,26 +1,31 @@
 {
-  "checkedAt": "2026-11-03T13:19:13.589335Z",
+  "checkedAt": "2026-11-03T13:20:32.636998Z",
   "health": {
-    "parse_error": "[Errno 2] No such file or directory: 'health.json'"
+    "ok": true,
+    "service": "seosprint",
+    "engine": "google-free",
+    "time": "2026-11-03T13:20:30.669Z"
   },
   "audit": {
-    "ok": null,
-    "url": null,
-    "score": null,
-    "findings": 0,
-    "title": null
+    "ok": true,
+    "url": "https://example.com",
+    "score": 65,
+    "findings": 9,
+    "title": "Example Domain"
   },
   "site": {
-    "ok": null,
-    "crawled": null,
-    "score": null,
-    "issues": 0
+    "ok": true,
+    "crawled": 3,
+    "score": 91,
+    "issues": 4
   },
   "serp": {
-    "ok": null,
-    "provider": null,
-    "results": 0,
+    "ok": true,
+    "provider": "bing",
+    "results": 10,
     "yourRank": null,
-    "tried": null
+    "tried": [
+      "bing:10"
+    ]
   }
 }
