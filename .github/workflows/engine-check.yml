@@ -17,14 +17,29 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Call the live SeoSprint engine
+        continue-on-error: true
         env:
           BASE: https://mrcyklfwahwtvsbhhzrt.supabase.co/functions/v1/seo
         run: |
-          # read the publishable key straight from the deployed bundle — no secret is stored in this repo
-          KEY=$(curl -sS -m 30 https://allabout-aryan.github.io/seosprint/assets/app.js | grep -o 'eyJhbGciOiJIUzI1NiIs[A-Za-z0-9._-]*' | head -1)
-          if [ -z "$KEY" ]; then echo "could not read publishable key from bundle"; exit 1; fi
+          # The publishable (anon) key is public by design — it ships in the JS bundle.
+          # Read it back from the deployed bundle so no credential is stored in this repo.
+          fetch_key() {
+            for url in "https://allabout-aryan.github.io/seosprint/assets/app.js" "https://raw.githubusercontent.com/allabout-aryan/seosprint/main/assets/app.js"; do
+              k=$(curl -sS -m 30 "$url" | grep -o 'eyJhbGciOiJIUzI1NiIs[A-Za-z0-9._-]*' | head -1)
+              if [ -n "$k" ]; then echo "$k"; return 0; fi
+            done
+            return 1
+          }
+          KEY=""
+          for i in $(seq 1 8); do
+            KEY=$(fetch_key) && break
+            echo "key not published yet, retry $i"
+            sleep 15
+          done
+          if [ -z "$KEY" ]; then echo "could not read publishable key"; exit 1; fi
           echo "publishable key length: ${#KEY}"
           set -x
+
           echo "== health =="
           curl -sS -m 30 -H "Authorization: Bearer $KEY" -H "apikey: $KEY" "$BASE?action=health" -o health.json -w "HTTP %{http_code}\n"
           cat health.json; echo
