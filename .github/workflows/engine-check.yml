@@ -18,9 +18,12 @@ jobs:
 
       - name: Call the live SeoSprint engine
         env:
-          KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yY3lrbGZ3YWh3dHZzYmhoenJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM2MzgwODYsImV4cCI6MjEwOTIxNDA4Nn0.KDEn3bTeEJdiTWju36I6c9zn4_TsXUCWkLgfjXPm5WU
           BASE: https://mrcyklfwahwtvsbhhzrt.supabase.co/functions/v1/seo
         run: |
+          # read the publishable key straight from the deployed bundle — no secret is stored in this repo
+          KEY=$(curl -sS -m 30 https://allabout-aryan.github.io/seosprint/assets/app.js | grep -o 'eyJhbGciOiJIUzI1NiIs[A-Za-z0-9._-]*' | head -1)
+          if [ -z "$KEY" ]; then echo "could not read publishable key from bundle"; exit 1; fi
+          echo "publishable key length: ${#KEY}"
           set -x
           echo "== health =="
           curl -sS -m 30 -H "Authorization: Bearer $KEY" -H "apikey: $KEY" "$BASE?action=health" -o health.json -w "HTTP %{http_code}\n"

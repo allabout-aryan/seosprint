@@ -268,6 +268,11 @@ async function serp(query, region = 'in-en') {
   const key = typeof Deno !== 'undefined' && Deno.env ? Deno.env.get('SERPAPI_KEY') : undefined;
 
   if (key) providers.push(['serpapi', async () => serpFromSerpApi(query, region, key)]);
+  // Bing first: it is the most reliable keyless source from data-centre IPs.
+  providers.push(['bing', async () => {
+    const r = await fetchText(`https://www.bing.com/search?q=${encodeURIComponent(query)}&count=20&setlang=en`, 15000);
+    return r.text ? parseBing(r.text, 20) : [];
+  }]);
   providers.push(['duckduckgo-html', async () => {
     const r = await fetchText(`https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}&kl=${encodeURIComponent(region)}`, 15000);
     return r.text ? parseSerp(r.text, 20) : [];
@@ -275,10 +280,6 @@ async function serp(query, region = 'in-en') {
   providers.push(['duckduckgo-lite', async () => {
     const r = await fetchText(`https://lite.duckduckgo.com/lite/?q=${encodeURIComponent(query)}&kl=${encodeURIComponent(region)}`, 15000);
     return r.text ? parseLite(r.text, 20) : [];
-  }]);
-  providers.push(['bing', async () => {
-    const r = await fetchText(`https://www.bing.com/search?q=${encodeURIComponent(query)}&count=20&setlang=en`, 15000);
-    return r.text ? parseBing(r.text, 20) : [];
   }]);
 
   const tried = [];
