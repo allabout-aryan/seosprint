@@ -1,12 +1,12 @@
 import { build } from 'esbuild';
-import { mkdirSync, copyFileSync, readdirSync, writeFileSync, rmSync, existsSync } from 'node:fs';
+import { mkdirSync, copyFileSync, readdirSync, writeFileSync, rmSync, existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 // tiny .env loader (no dependency on dotenv being present)
 function loadEnv() {
   const env = {};
   try {
-    const raw = require('node:fs').readFileSync('.env', 'utf8');
+    const raw = readFileSync('.env', 'utf8');
     raw.split('\n').forEach((line) => {
       const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/);
       if (m) env[m[1]] = m[2].replace(/^["']|["']$/g, '');
@@ -26,14 +26,19 @@ await build({
   sourcemap: false,
   target: ['es2020'],
   jsx: 'automatic',
+  format: 'esm',
   outdir: 'dist/assets',
   entryNames: 'app',
   assetNames: 'app',
   loader: { '.css': 'css', '.svg': 'dataurl', '.png': 'dataurl' },
   define: {
-    'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(env.VITE_SUPABASE_URL || ''),
-    'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(env.VITE_SUPABASE_ANON_KEY || ''),
-    'import.meta.env.VITE_GOOGLE_CLIENT_ID': JSON.stringify(env.VITE_GOOGLE_CLIENT_ID || ''),
+    // Define the whole env object: the source reads `import.meta.env?.X`, and a
+    // per-key define would not match across the optional-chaining operator.
+    'import.meta.env': JSON.stringify({
+      VITE_SUPABASE_URL: env.VITE_SUPABASE_URL || '',
+      VITE_SUPABASE_ANON_KEY: env.VITE_SUPABASE_ANON_KEY || '',
+      VITE_GOOGLE_CLIENT_ID: env.VITE_GOOGLE_CLIENT_ID || '',
+    }),
     'process.env.NODE_ENV': '"production"',
   },
   logLevel: 'info',

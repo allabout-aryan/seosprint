@@ -12,6 +12,14 @@ export const supabase: SupabaseClient | null = supabaseEnabled
 
 export const SUPABASE_HOST = url ? url.replace('https://', '').split('.')[0] : 'local';
 
+/* Never let a slow or blocked network hang a screen. */
+export function withTimeout<T>(p: PromiseLike<T>, ms = 7000): Promise<T> {
+  return Promise.race([
+    Promise.resolve(p),
+    new Promise<T>((_, reject) => setTimeout(() => reject(new Error('Supabase request timed out')), ms)),
+  ]) as Promise<T>;
+}
+
 /* ---------- auth ---------- */
 export async function signInWithPassword(email: string, password: string) {
   if (!supabase) return { error: { message: 'Supabase is not configured in this build — use the demo workspace.' } };
@@ -31,7 +39,7 @@ export async function signOut() {
 }
 export async function currentSession() {
   if (!supabase) return null;
-  try { const { data } = await supabase.auth.getSession(); return data.session; } catch { return null; }
+  try { const { data } = await withTimeout(supabase.auth.getSession(), 5000); return data.session; } catch { return null; }
 }
 
 /* ---------- persistence (best-effort, never throws) ---------- */
@@ -43,7 +51,7 @@ export type IntegrationRow = {
 export async function loadIntegrations(workspace: string): Promise<IntegrationRow[] | null> {
   if (!supabase) return null;
   try {
-    const { data, error } = await supabase.from('integrations').select('*').eq('workspace', workspace);
+    const { data, error } = await withTimeout(supabase.from('integrations').select('*').eq('workspace', workspace));
     if (error) return null;
     return (data || []) as IntegrationRow[];
   } catch { return null; }
@@ -52,7 +60,7 @@ export async function loadIntegrations(workspace: string): Promise<IntegrationRo
 export async function upsertIntegration(row: IntegrationRow) {
   if (!supabase) return { ok: false };
   try {
-    const { error } = await supabase.from('integrations').upsert(row, { onConflict: 'workspace,provider' });
+    const { error } = await withTimeout(supabase.from('integrations').upsert(row, { onConflict: 'workspace,provider' }));
     return { ok: !error, error };
   } catch (e: any) { return { ok: false, error: e }; }
 }
@@ -73,7 +81,7 @@ export async function saveEvent(workspace: string, kind: string, payload: any) {
 export async function saveKeyword(workspace: string, keyword: string, volume: number, difficulty: number, intent: string) {
   if (!supabase) return { ok: false };
   try {
-    const { error } = await supabase.from('saved_keywords').upsert({ workspace, keyword, volume, difficulty, intent }, { onConflict: 'workspace,keyword' });
+    const { error } = await withTimeout(supabase.from('saved_keywords').upsert({ workspace, keyword, volume, difficulty, intent }, { onConflict: 'workspace,keyword' }));
     return { ok: !error };
   } catch { return { ok: false }; }
 }
