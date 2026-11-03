@@ -52,11 +52,11 @@ const html = `<!doctype html>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SeoSprint — SEO command center for Google data</title>
-    <meta name="description" content="SeoSprint unifies Google Search Console, GA4 and Google Ads into one SEO decision engine: opportunities, content decay, rank tracking, site audits and AI visibility." />
+    <title>SeoSprint — Google-free SEO crawler and audit</title>
+    <meta name="description" content="SeoSprint crawls any site itself — no Google account, no API key. Scored technical audits, whole-site crawls, competitor compare, broken-link reports and live rank checks." />
     <meta name="theme-color" content="#070a12" />
-    <meta property="og:title" content="SeoSprint — SEO command center for Google data" />
-    <meta property="og:description" content="Connect Search Console, GA4 and Google Ads once. Get one ranked list of what to fix, on which page, and what it is worth." />
+    <meta property="og:title" content="SeoSprint — Google-free SEO crawler and audit" />
+    <meta property="og:description" content="Audit any site without a Google account. Our own crawler, real SERP checks, honest limits." />
     <meta property="og:type" content="website" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
