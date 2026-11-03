@@ -1,0 +1,26 @@
+{
+  "checkedAt": "2026-11-03T13:19:13.589335Z",
+  "health": {
+    "parse_error": "[Errno 2] No such file or directory: 'health.json'"
+  },
+  "audit": {
+    "ok": null,
+    "url": null,
+    "score": null,
+    "findings": 0,
+    "title": null
+  },
+  "site": {
+    "ok": null,
+    "crawled": null,
+    "score": null,
+    "issues": 0
+  },
+  "serp": {
+    "ok": null,
+    "provider": null,
+    "results": 0,
+    "yourRank": null,
+    "tried": null
+  }
+}
