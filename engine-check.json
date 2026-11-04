@@ -1,0 +1,37 @@
+{
+  "checkedAt": "2026-11-04T11:54:33.826258Z",
+  "health": {
+    "ok": true,
+    "service": "seosprint",
+    "engine": "google-free",
+    "cached": 0,
+    "time": "2026-11-04T11:54:30.916Z"
+  },
+  "audit": {
+    "ok": true,
+    "url": "https://example.com",
+    "score": 65,
+    "findings": 9,
+    "title": "Example Domain"
+  },
+  "site": {
+    "ok": true,
+    "crawled": 3,
+    "score": 91,
+    "issues": 4
+  },
+  "serp": {
+    "ok": true,
+    "provider": "bing",
+    "results": 10,
+    "yourRank": null,
+    "tried": [
+      "bing:10"
+    ]
+  },
+  "report": {
+    "roundTrip": true,
+    "kind": "audit",
+    "score": 65
+  }
+}
