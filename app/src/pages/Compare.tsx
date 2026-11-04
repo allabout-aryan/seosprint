@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Play, Loader2, AlertTriangle, ArrowRight, Swords } from 'lucide-react';
+import { Play, Loader2, AlertTriangle, ArrowRight, Swords, Share2 } from 'lucide-react';
 import { useApp } from '../lib/store';
 import { Card, CardHead, PageHead, Badge, Empty } from '../components/ui';
 import { compareDomains, LiveError, type CompareResult } from '../lib/live';
+import { saveReport, shareUrl } from '../lib/reports';
 import { fmtNum } from '../lib/format';
 
 export default function Compare() {
@@ -11,6 +12,20 @@ export default function Compare() {
   const [busy, setBusy] = useState(false);
   const [res, setRes] = useState<CompareResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [sharing, setSharing] = useState(false);
+
+  const share = async () => {
+    if (!res) return;
+    setSharing(true);
+    const id = await saveReport('compare', res, {
+      url: res.rows.find((r) => r.ok)?.url || null,
+      title: res.rows.filter((r) => r.ok).map((r) => r.domain).join(' vs '),
+    });
+    setSharing(false);
+    if (!id) { toast('Could not create a share link', 'err'); return; }
+    try { await navigator.clipboard.writeText(shareUrl(id)); toast('Share link copied to clipboard'); }
+    catch { toast('Could not copy the link', 'err'); }
+  };
 
   const set = (i: number, v: string) => setUrls((u) => u.map((x, j) => (j === i ? v : x)));
 
@@ -69,6 +84,12 @@ export default function Compare() {
               {busy ? 'Crawling…' : 'Compare pages'}
             </button>
             <span className="tiny muted">Up to 4 URLs. Each is fetched and parsed exactly like a crawl.</span>
+            {res && (
+              <button className="btn btn-sm" onClick={share} disabled={sharing} style={{ marginLeft: 'auto' }}>
+                {sharing ? <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> : <Share2 size={13} />}
+                {sharing ? 'Creating link…' : 'Share this comparison'}
+              </button>
+            )}
           </div>
         </div>
       </Card>

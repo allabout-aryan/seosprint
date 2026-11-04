@@ -14,6 +14,7 @@ import Ranks from './pages/Ranks';
 import Crawl from './pages/Crawl';
 import Compare from './pages/Compare';
 import Serp from './pages/Serp';
+import ReportView from './pages/Report';
 import Backlinks from './pages/Backlinks';
 import AIVisibility from './pages/AIVisibility';
 import Connectors from './pages/Connectors';
@@ -34,6 +35,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/r/:id" element={<ReportView />} />
           <Route path="/app" element={<Shell />}>
             <Route index element={<Overview />} />
             <Route path="ask" element={<Ask />} />

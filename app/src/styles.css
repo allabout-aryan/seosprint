@@ -314,3 +314,24 @@ table.tbl th.r, table.tbl td.r { text-align: right; }
   .g2, .g3 { grid-template-columns: 1fr; }
   .content { padding: 16px; }
 }
+
+/* ---------- mobile nav ---------- */
+.menu-btn { display: none !important; }
+@media (max-width: 900px) {
+  .menu-btn { display: inline-flex !important; }
+  .sb-backdrop {
+    position: fixed; inset: 0; z-index: 55;
+    background: rgba(3, 6, 12, .62);
+    backdrop-filter: blur(3px);
+  }
+  .sidebar { box-shadow: 0 0 80px rgba(0,0,0,.6); }
+  .topbar { padding: 10px 14px; gap: 8px; }
+  .page-head h1 { font-size: 18px; }
+  .g-2-1, .g-1-2, .g3 { grid-template-columns: 1fr; }
+  .lnav .row > .btn span { display: none; }
+}
+@media (max-width: 620px) {
+  .g4, .g5 { grid-template-columns: 1fr; }
+  .hero { padding-top: 44px; }
+  .content { padding: 12px; }
+}

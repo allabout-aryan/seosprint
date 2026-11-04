@@ -20,11 +20,12 @@ jobs:
         continue-on-error: true
         env:
           BASE: https://mrcyklfwahwtvsbhhzrt.supabase.co/functions/v1/seo
+          SUPA: https://mrcyklfwahwtvsbhhzrt.supabase.co
         run: |
           # The publishable (anon) key is public by design — it ships in the JS bundle.
           # Read it back from the deployed bundle so no credential is stored in this repo.
           fetch_key() {
-            for url in "https://allabout-aryan.github.io/seosprint/assets/app.js" "https://raw.githubusercontent.com/allabout-aryan/seosprint/main/assets/app.js"; do
+            for url in "https://allabout-aryan.github.io/seosprint/assets/app.js" "https://raw.githubusercontent.com/allabout-aryan/seosprint/main/assets/app.js?cb=$RANDOM"; do
               k=$(curl -sS -m 30 "$url" | grep -o 'eyJhbGciOiJIUzI1NiIs[A-Za-z0-9._-]*' | head -1)
               if [ -n "$k" ]; then echo "$k"; return 0; fi
             done
@@ -50,6 +51,12 @@ jobs:
             -d '{"action":"audit","url":"example.com"}' -o audit.json -w "HTTP %{http_code}\n"
           head -c 400 audit.json; echo
 
+          echo "== cache hit on repeat =="
+          curl -sS -m 60 -X POST "$BASE" -D cache.txt \
+            -H "Authorization: Bearer $KEY" -H "apikey: $KEY" -H "content-type: application/json" \
+            -d '{"action":"audit","url":"example.com"}' -o /dev/null -w "HTTP %{http_code}\n"
+          grep -i 'x-seosprint-cache' cache.txt || echo "no cache header"
+
           echo "== site crawl wikipedia =="
           curl -sS -m 90 -X POST "$BASE" \
             -H "Authorization: Bearer $KEY" -H "apikey: $KEY" -H "content-type: application/json" \
@@ -62,11 +69,24 @@ jobs:
             -d '{"action":"serp","q":"indoor planters","domain":"urbanleaf.in"}' -o serp.json -w "HTTP %{http_code}\n"
           head -c 300 serp.json; echo
 
+          echo "== share a report and read it back =="
+          RID=$(python3 -c "import secrets;print(''.join(secrets.choice('abcdefghijkmnpqrstuvwxyz23456789') for _ in range(10)))")
+          echo "report id: $RID"
+          curl -sS -m 30 -X POST "$SUPA/rest/v1/reports" \
+            -H "apikey: $KEY" -H "Authorization: Bearer $KEY" -H "content-type: application/json" \
+            -H "Prefer: return=minimal" \
+            -d "{\"id\":\"$RID\",\"kind\":\"audit\",\"url\":\"example.com\",\"score\":65,\"title\":\"Example Domain\",\"payload\":{\"ok\":true,\"score\":65}}" \
+            -o /dev/null -w "insert HTTP %{http_code}\n"
+          curl -sS -m 30 "$SUPA/rest/v1/reports?id=eq.$RID&select=id,kind,score,url" \
+            -H "apikey: $KEY" -H "Authorization: Bearer $KEY" -o report.json -w "read HTTP %{http_code}\n"
+          cat report.json; echo
+          echo "public link: https://allabout-aryan.github.io/seosprint/#/r/$RID"
+
       - name: Summarise
         if: always()
         run: |
           python3 - <<'PY'
-          import json, datetime, os
+          import json, datetime
           out = {"checkedAt": datetime.datetime.utcnow().isoformat() + "Z"}
           def load(name):
               try:
@@ -84,6 +104,10 @@ jobs:
           p = load("serp.json")
           out["serp"] = {"ok": p.get("ok"), "provider": p.get("provider"), "results": len(p.get("results") or []),
                          "yourRank": p.get("yourRank"), "tried": p.get("tried")}
+          r = load("report.json")
+          if isinstance(r, list):
+              r = r[0] if r else {}
+          out["report"] = {"roundTrip": bool(r.get("id")), "kind": r.get("kind"), "score": r.get("score")}
           with open("engine-check.json", "w") as f:
               json.dump(out, f, indent=2)
           print(json.dumps(out, indent=2))

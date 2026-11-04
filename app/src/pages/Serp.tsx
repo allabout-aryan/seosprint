@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Search, Loader2, AlertTriangle, Info, ExternalLink } from 'lucide-react';
+import { Search, Loader2, AlertTriangle, Info, ExternalLink, Share2 } from 'lucide-react';
 import { useApp } from '../lib/store';
 import { Card, CardHead, PageHead, Badge, Empty } from '../components/ui';
 import { checkSerp, LiveError, type SerpResult } from '../lib/live';
+import { saveReport, shareUrl } from '../lib/reports';
 
 export default function Serp() {
   const { ws, toast } = useApp();
@@ -11,6 +12,17 @@ export default function Serp() {
   const [busy, setBusy] = useState(false);
   const [res, setRes] = useState<SerpResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [sharing, setSharing] = useState(false);
+
+  const share = async () => {
+    if (!res || !res.ok) return;
+    setSharing(true);
+    const id = await saveReport('serp', res, { url: res.yourDomain || null, title: res.query });
+    setSharing(false);
+    if (!id) { toast('Could not create a share link', 'err'); return; }
+    try { await navigator.clipboard.writeText(shareUrl(id)); toast('Share link copied to clipboard'); }
+    catch { toast('Could not copy the link', 'err'); }
+  };
 
   const run = async () => {
     if (!q.trim()) return;
@@ -76,6 +88,10 @@ export default function Serp() {
                 <div className="tiny muted">Provider</div>
                 <div className="sm strong">{res.provider}</div>
                 <div className="tiny muted">{res.results.length} organic results</div>
+                <button className="btn btn-sm" onClick={share} disabled={sharing} style={{ marginTop: 8 }}>
+                  {sharing ? <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> : <Share2 size={13} />}
+                  {sharing ? 'Creating…' : 'Share'}
+                </button>
               </div>
             </div>
           </Card>

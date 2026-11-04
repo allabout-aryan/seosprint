@@ -13,11 +13,32 @@ const CORS = {
   'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
 };
 
-const json = (body, status = 200) =>
+const json = (body, status = 200, extra = {}) =>
   new Response(JSON.stringify(body), {
     status,
-    headers: { ...CORS, 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
+    headers: { ...CORS, 'Content-Type': 'application/json', 'Cache-Control': 'no-store', ...extra },
   });
+
+/* Small in-isolate cache. Public sharing means repeat traffic; this keeps the
+   crawler from re-fetching the same URL for every visitor. */
+const CACHE = new Map();
+const CACHE_TTL = { audit: 600000, site: 900000, serp: 300000, keywords: 900000, compare: 600000, links: 900000 };
+const CACHE_MAX = 300;
+
+function cacheGet(key) {
+  const hit = CACHE.get(key);
+  if (!hit) return null;
+  if (hit.exp < Date.now()) { CACHE.delete(key); return null; }
+  return hit.data;
+}
+
+function cacheSet(key, data, ttl) {
+  if (CACHE.size >= CACHE_MAX) {
+    const oldest = CACHE.keys().next().value;
+    if (oldest) CACHE.delete(oldest);
+  }
+  CACHE.set(key, { exp: Date.now() + ttl, data });
+}
 
 async function fetchText(url, ms = 12000, opts = {}) {
   const started = Date.now();
@@ -653,25 +674,43 @@ export async function handler(req) {
   const action = body.action || url.searchParams.get('action') || 'health';
   const region = body.region || url.searchParams.get('region') || 'in-en';
 
+  if (action === 'health') {
+    return json({ ok: true, service: 'seosprint', engine: 'google-free', cached: CACHE.size, time: new Date().toISOString() });
+  }
+
+  const cacheKey = `${action}:${JSON.stringify(body)}`;
+  const cached = cacheGet(cacheKey);
+  if (cached) return json(cached, 200, { 'X-SeoSprint-Cache': 'hit' });
+
   try {
+    let result;
     switch (action) {
-      case 'health':
-        return json({ ok: true, service: 'seosprint', engine: 'google-free', time: new Date().toISOString() });
       case 'audit':
-        return json(await runAudit(body.url || url.searchParams.get('url')));
+        result = await runAudit(body.url || url.searchParams.get('url'));
+        break;
       case 'serp':
-        return json(await runSerp(body.q || url.searchParams.get('q'), region, body.domain));
+        result = await runSerp(body.q || url.searchParams.get('q'), region, body.domain);
+        break;
       case 'keywords':
-        return json(await runKeywords(body.seed || url.searchParams.get('seed'), region));
+        result = await runKeywords(body.seed || url.searchParams.get('seed'), region);
+        break;
       case 'links':
-        return json(await runLinks(body.url || url.searchParams.get('url'), Number(body.limit) || 20));
+        result = await runLinks(body.url || url.searchParams.get('url'), Number(body.limit) || 20);
+        break;
       case 'site':
-        return json(await runSite(body.url || url.searchParams.get('url'), Number(body.maxPages) || 12));
+        result = await runSite(body.url || url.searchParams.get('url'), Number(body.maxPages) || 12);
+        break;
       case 'compare':
-        return json(await runCompare(body.urls));
+        result = await runCompare(body.urls);
+        break;
       default:
         return json({ ok: false, error: `Unknown action: ${action}` }, 400);
     }
+
+    if (result && result.ok) {
+      cacheSet(cacheKey, result, CACHE_TTL[action] || 300000);
+    }
+    return json(result, 200, { 'X-SeoSprint-Cache': 'miss' });
   } catch (e) {
     return json({ ok: false, error: String(e && e.message ? e.message : e) }, 500);
   }

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  Play, Globe, ChevronRight, ShieldCheck, Loader2, AlertTriangle, CheckCircle2, Link2, ExternalLink, Zap,
+  Play, Globe, ChevronRight, ShieldCheck, Loader2, AlertTriangle, CheckCircle2, Link2, ExternalLink, Zap, Share2,
 } from 'lucide-react';
 import { useApp } from '../lib/store';
 import { Card, CardHead, Kpi, PageHead, Badge, Segmented, Empty, ConnectorGlyph } from '../components/ui';
@@ -10,6 +10,7 @@ import {
   crawlSite, auditPage, checkLinks, ISSUE_META, LiveError,
   type SiteResult, type AuditResult, type LinksResult, type LiveFinding,
 } from '../lib/live';
+import { saveReport, shareUrl } from '../lib/reports';
 
 const SEV_TONE: Record<string, string> = { critical: 'neg', high: 'warn', medium: 'info', low: '' };
 
@@ -24,6 +25,24 @@ export default function Crawl() {
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<'issues' | 'pages' | 'links'>('issues');
   const [open, setOpen] = useState<string | null>(null);
+  const [sharing, setSharing] = useState(false);
+
+  const share = async () => {
+    const kind = site ? 'site' : page ? 'audit' : null;
+    const payload = site || page;
+    if (!kind || !payload) return;
+    setSharing(true);
+    const id = await saveReport(kind, payload, {
+      url: site?.origin || page?.finalUrl || target,
+      score: site?.siteScore ?? page?.score ?? null,
+      title: site?.origin || page?.page?.title || target,
+    });
+    setSharing(false);
+    if (!id) { toast('Could not create a share link', 'err'); return; }
+    const link = shareUrl(id);
+    try { await navigator.clipboard.writeText(link); toast('Share link copied to clipboard'); }
+    catch { toast(`Share link: ${link}`, 'info'); }
+  };
 
   const run = async (kind: 'site' | 'page') => {
     const url = target.trim();
@@ -211,6 +230,12 @@ export default function Crawl() {
           {busy === 'links' ? <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> : <Link2 size={13} />}
           Check broken links
         </button>
+        {live && (
+          <button className="btn btn-primary btn-sm" onClick={share} disabled={sharing} style={{ marginLeft: 'auto' }}>
+            {sharing ? <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> : <Share2 size={13} />}
+            {sharing ? 'Creating link…' : 'Share this report'}
+          </button>
+        )}
       </div>
 
       {tab === 'issues' && (

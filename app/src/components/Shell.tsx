@@ -56,6 +56,7 @@ export default function Shell() {
 
   return (
     <div className="shell">
+      {mobileNav && <div className="sb-backdrop" onClick={() => setMobileNav(false)} />}
       <aside className="sidebar" style={mobileNav ? { display: 'flex', position: 'fixed', inset: '0 auto 0 0', width: 260, zIndex: 60 } : undefined}>
         <div className="sb-brand">
           <Logo size={24} />
@@ -102,7 +103,7 @@ export default function Shell() {
 
       <div className="main">
         <div className="topbar">
-          <button className="btn btn-ghost btn-sm" style={{ display: 'inline-flex' }} onClick={() => setMobileNav(true)} aria-label="Menu"><Menu size={16} /></button>
+          <button className="btn btn-ghost btn-sm menu-btn" onClick={() => setMobileNav(true)} aria-label="Open menu"><Menu size={16} /></button>
           <form onSubmit={submit} style={{ maxWidth: 420, flex: 1 }}>
             <div style={{ position: 'relative' }}>
               <Search size={15} style={{ position: 'absolute', left: 11, top: 11, color: 'var(--muted)' }} />
