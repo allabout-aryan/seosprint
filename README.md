@@ -18,8 +18,19 @@ Live: **https://allabout-aryan.github.io/seosprint/**
 | **SERP & ranks** | Reads public result pages (DuckDuckGo HTML → DuckDuckGo Lite → Bing), returns the real top 20 and your position | No |
 | **Keywords** | Generates candidate modifiers and questions, verifies each against live results, scores competition by big-domain share | No |
 | **Broken links** | Fetches every link on a page and reports status codes | No |
+| **Shareable reports** | Any crawl, comparison or SERP check becomes a public link (`/#/r/<id>`) anyone can open, no account needed | No |
 | **AI visibility** | Prompt × model matrix for ChatGPT, Gemini, Perplexity, AI Overviews | No |
 | **Search Console / GA4 / Ads** | Optional OAuth import of query, session and campaign data | Yes — optional |
+
+## Sharing
+
+Every crawl, comparison and SERP check has a **Share this report** button. It stores the result in Postgres under an unguessable 10-character id and copies a link like:
+
+```
+https://allabout-aryan.github.io/seosprint/
+```
+
+Anyone who opens it gets a read-only report page — score, findings, pages, whatever the report contains — with a "run your own crawl" button. No sign-in, no account. Reports are readable by anyone holding the link and are pruned after 90 days.
 
 ## Architecture
 
@@ -31,7 +42,7 @@ Browser (React 18 + TypeScript SPA, hash routing)
    │        Deno runtime, fetches the web directly
    │
    ├── Supabase Postgres (ap-south-1)
-   │        workspaces · integrations · saved_keywords · audit_runs · events
+   │        workspaces · integrations · saved_keywords · audit_runs · events · reports
    │        Row-level security on every table
    │
    └── GitHub Pages  ← this site
